@@ -37,6 +37,8 @@ class BlockdiagApp(Application):
 
     def parse_options(self, args):
         self.options = BlockdiagOptions(self.module).parse(args)
+        if self.options.module:
+            self.module = self.options.module
 
     def build_diagram(self, tree):
         if not self.options.separate:
@@ -59,5 +61,8 @@ class BlockdiagApp(Application):
             return 0
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     return BlockdiagApp().run(args)

@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import codecs
+import importlib
 import os
 import re
 import sys
@@ -103,9 +104,15 @@ class Application(object):
         drawer.draw()
 
         if self.options.size:
-            drawer.save(size=self.options.size)
+            output = drawer.save(size=self.options.size)
         else:
-            drawer.save()
+            output = drawer.save()
+
+        if self.options.output is None and output is not None:
+            if isinstance(output, (bytes, bytearray)):
+                sys.stdout.buffer.write(output)
+            else:
+                sys.stdout.write(output)
 
         return 0
 
@@ -121,6 +128,9 @@ class Application(object):
 
 class Options(object):
     def __init__(self, module):
+        self.parser = None
+        self.args = None
+        self.options = None
         self.module = module
         self.build_parser()
 
@@ -141,6 +151,7 @@ class Options(object):
                      help='read configurations from FILE', metavar='FILE')
         p.add_option('--debug', action='store_true',
                      help='Enable debug mode')
+        p.add_option('--module', dest='module', help='module name')
         p.add_option('-o', dest='output',
                      help='write diagram to FILE', metavar='FILE')
         p.add_option('-f', '--font', default=[], action='append',
@@ -171,11 +182,14 @@ class Options(object):
         if self.options.output:
             pass
         elif self.options.output == '-':
-            self.options.output = 'output.' + self.options.type.lower()
+            self.options.output = None
         else:
-            basename = os.path.splitext(self.options.input)[0]
-            ext = '.%s' % self.options.type.lower()
-            self.options.output = basename + ext
+            if self.options.input == '-':
+                self.options.output = None
+            else:
+                basename = os.path.splitext(self.options.input)[0]
+                ext = '.%s' % self.options.type.lower()
+                self.options.output = basename + ext
 
         self.options.type = self.options.type.upper()
         try:
@@ -194,8 +208,7 @@ class Options(object):
 
         if self.options.type == 'PDF':
             try:
-                import reportlab.pdfgen.canvas
-                reportlab.pdfgen.canvas
+                import reportlab.pdfgen.canvas  # noqa: F401
             except ImportError:
                 msg = "could not output PDF format; Install reportlab."
                 raise RuntimeError(msg)
@@ -219,6 +232,16 @@ class Options(object):
         if self.options.fontmap and not os.path.isfile(self.options.fontmap):
             msg = "fontmap file is not found: %s" % self.options.fontmap
             raise RuntimeError(msg)
+
+        if self.options.module:
+            try:
+                module = importlib.import_module(self.options.module)
+                importlib.import_module(f"{self.options.module}.builder")
+                importlib.import_module(f"{self.options.module}.parser")
+                importlib.import_module(f"{self.options.module}.drawer")
+                self.options.module = module
+            except ImportError:
+                raise RuntimeError(f"could not load module; Make sure {self.options.module} is available.")
 
     def read_configfile(self):
         if self.options.config:

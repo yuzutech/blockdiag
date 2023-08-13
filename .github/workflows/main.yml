@@ -22,9 +22,9 @@ jobs:
           - python-version: '3.11'
             toxenv: pillow9.x
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -36,25 +36,66 @@ jobs:
           TOXENV: ${{ matrix.toxenv }}
         run: tox -- -v
   native:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+          - os: 'ARM64' # self-hosted
+            platform: 'linux-arm64'
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        # actions/setup-python does not work on arm64/linux
+        # https://github.com/actions/setup-python/issues/678
+        uses: actions/setup-python@v4
         with:
           python-version: 3.11
-      - name: Install dependencies
+        # we can skip this step since Python3 is already installed on the self-hosted runner.
+        if: ${{ matrix.platform != 'linux-arm64' }}
+      - name: Install system dependencies
         run: |
           sudo apt-get install fonts-ipafont-gothic ghostscript libjpeg8-dev libfreetype6-dev ccache patchelf
+        # we can skip this step since system dependencies are already installed on the self-hosted runner.
+        if: ${{ matrix.platform != 'linux-arm64' }}
+      - name: Install project dependencies
+        run: | 
           pip install -U docutils tox nuitka
-          pip install .
-      - name: Build native image
+          pip install .[pdf]
+          pip install seqdiag nwdiag actdiag
+      - name: Build single binary image
         run: |
-          python3 -m nuitka --include-module=blockdiag.imagedraw --include-module=blockdiag.plugins --include-module=blockdiag.utils --include-module=blockdiag.noderenderer --onefile `which blockdiag`
-      - name: Smoke test
-        run: |
-          ./blockdiag.bin
+          python3 -m nuitka --nofollow-import-to=*.tests \
+            --nofollow-import-to=reportlab.graphics.testshapes \
+            --include-module=actdiag \
+            --include-module=nwdiag \
+            --include-module=seqdiag \
+            --include-module=packetdiag \
+            --include-module=rackdiag \
+            --include-module=reportlab.pdfgen.canvas \
+            --include-module=blockdiag.imagedraw \
+            --include-module=blockdiag.plugins \
+            --include-module=blockdiag.utils \
+            --include-module=blockdiag.noderenderer \
+            --onefile src/blockdiag \
+            --output-filename=blockdiag-bundle-${PLATFORM}.bin
+        env:
+          PLATFORM: ${{ matrix.os }}
       - uses: actions/upload-artifact@v3
         with:
-          name: blockdiag.bin
-          path: ./blockdiag.bin
+          name: native-image-${{ matrix.os }}
+          path: ./*.bin
+      - name: Smoke test
+        run: |
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg - 
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tpng - 
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tpdf -
+          echo 'seqdiag { A -> B [label = "call"]; A <- B [label = "return"]; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=seqdiag -
+          echo 'actdiag { write -> convert -> image; lane user { label = "User"; write [label = "Writing reST"]; image [label = "Get diagram IMAGE"]; }; lane actdiag { convert [label = "Convert reST to Image"]; } }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=actdiag -
+          echo 'packetdiag {  colwidth = 32;  node_height = 72;  0-15: Source Port;  16-31: Destination Port; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=packetdiag -
+          echo 'nwdiag { network dmz { web01; web02; }; network internal { web01; web02; db01; } }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=nwdiag -
+          echo 'rackdiag { 8U; 1: UPS [2U]; 3: DB Server; 4: Web Server;  8: L3 Switch }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=rackdiag -
+        env:
+          PLATFORM: ${{ matrix.os }}

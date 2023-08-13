@@ -15,6 +15,7 @@
 
 import math
 import re
+import sys
 
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
@@ -31,6 +32,7 @@ class PDFImageDraw(base.ImageDraw):
     baseline_text_rendering = True
 
     def __init__(self, filename, **kwargs):
+        self.size = None
         self.filename = filename
         self.canvas = None
         self.fonts = {}
@@ -38,7 +40,11 @@ class PDFImageDraw(base.ImageDraw):
         self.set_canvas_size(Size(1, 1))  # This line make textsize() workable
 
     def set_canvas_size(self, size):
-        self.canvas = canvas.Canvas(self.filename, pagesize=size)
+        if self.filename is None:
+            self.canvas = canvas.Canvas(sys.stdout.buffer, pagesize=size)
+        else:
+            self.canvas = canvas.Canvas(self.filename, pagesize=size)
+
         self.size = size
 
     def set_font(self, font):
