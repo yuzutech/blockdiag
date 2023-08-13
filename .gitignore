@@ -16,3 +16,4 @@ TAGS
 env/
 build/
 dist/
+venv/
