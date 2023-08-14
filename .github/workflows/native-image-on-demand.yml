@@ -75,11 +75,9 @@ jobs:
       - name: Cache native image
         uses: actions/cache/save@v3
         with:
-          path: "blockdiag-bundle-${PLATFORM}.bin"
-          key: "native-image-${PLATFORM}-${{ github.run_id }}"
+          path: "blockdiag-bundle-${{ matrix.platform }}.bin"
+          key: "native-image-${{ matrix.platform }}-${{ github.run_id }}"
           enableCrossOsArchive: true
-        env:
-          PLATFORM: ${{ matrix.platform }}
   upload:
     needs: [ native_images ]
     runs-on: ubuntu-latest
