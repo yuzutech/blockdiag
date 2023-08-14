@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.1.0 (2023-08-14)
+------------------
+* Allow to write result to stdout
+* Produce a single binary for AMD64 and ARM64 including blockdiag, seqdiag, actdiag, nwdiag, packetdiag and rackdiag
+
 3.0.0 (2021-12-06)
 ------------------
 * Drop python3.6 support

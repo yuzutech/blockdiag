@@ -59,7 +59,7 @@ jobs:
             --onefile src/blockdiag \
             --output-filename=blockdiag-bundle-${PLATFORM}.bin
         env:
-          PLATFORM: ${{ matrix.os }}
+          PLATFORM: ${{ matrix.platform }}
       - name: Smoke test
         run: |
           echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg - 
@@ -71,13 +71,15 @@ jobs:
           echo 'nwdiag { network dmz { web01; web02; }; network internal { web01; web02; db01; } }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=nwdiag -
           echo 'rackdiag { 8U; 1: UPS [2U]; 3: DB Server; 4: Web Server;  8: L3 Switch }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=rackdiag -
         env:
-          PLATFORM: ${{ matrix.os }}
+          PLATFORM: ${{ matrix.platform }}
       - name: Cache native image
         uses: actions/cache/save@v3
         with:
           path: "blockdiag-bundle-${PLATFORM}.bin"
           key: "native-image-${PLATFORM}-${{ github.run_id }}"
           enableCrossOsArchive: true
+        env:
+          PLATFORM: ${{ matrix.platform }}
   upload:
     needs: [ native_images ]
     runs-on: ubuntu-latest
