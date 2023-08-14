@@ -12,13 +12,21 @@ Features
 * Generate block-diagram from dot like text (basic feature).
 * Support multiple languages for node-label (utf-8 only).
 
-You can get some examples and generated images on
-`blockdiag.com <http://blockdiag.com/en/blockdiag/examples.html>`_.
-
 Install
 =======
 
-`blockdiag` is available as a native binary on AMD64 architecture.
+`blockdiag` is available as a native binary on Linux AMD64 and ARM64 architecture: https://github.com/yuzutech/blockdiag/releases.
+
+The native binary includes:
+
+* blockdiag
+* seqdiag
+* actdiag
+* packetdiag
+* rackdiag
+* nwdiag
+
+Use the `--module=` option from the command line to select the corresponding module.
 
 License
 =======

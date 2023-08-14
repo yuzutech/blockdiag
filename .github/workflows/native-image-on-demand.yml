@@ -1,0 +1,113 @@
+name: Native Images On-Demand
+
+run-name: Native Images ${{ inputs.tag }} by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag name
+        required: true
+
+jobs:
+  native_images:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+          - os: 'ARM64' # self-hosted
+            platform: 'linux-arm64'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "refs/tags/${{ github.event.inputs.tag }}"
+      - name: Set up Python 3.11
+        # actions/setup-python does not work on arm64/linux
+        # https://github.com/actions/setup-python/issues/678
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+        # we can skip this step since Python3 is already installed on the self-hosted runner.
+        if: ${{ matrix.platform != 'linux-arm64' }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install fonts-ipafont-gothic ghostscript libjpeg8-dev libfreetype6-dev ccache patchelf
+        # we can skip this step since system dependencies are already installed on the self-hosted runner.
+        if: ${{ matrix.platform != 'linux-arm64' }}
+      - name: Install project dependencies
+        run: | 
+          pip install -U docutils tox nuitka
+          pip install .[pdf]
+          pip install seqdiag nwdiag actdiag
+      - name: Build single binary image
+        run: |
+          python3 -m nuitka --nofollow-import-to=*.tests \
+            --nofollow-import-to=reportlab.graphics.testshapes \
+            --include-module=actdiag \
+            --include-module=nwdiag \
+            --include-module=seqdiag \
+            --include-module=packetdiag \
+            --include-module=rackdiag \
+            --include-module=reportlab.pdfgen.canvas \
+            --include-module=blockdiag.imagedraw \
+            --include-module=blockdiag.plugins \
+            --include-module=blockdiag.utils \
+            --include-module=blockdiag.noderenderer \
+            --onefile src/blockdiag \
+            --output-filename=blockdiag-bundle-${PLATFORM}.bin
+        env:
+          PLATFORM: ${{ matrix.os }}
+      - name: Smoke test
+        run: |
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg - 
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tpng - 
+          echo 'blockdiag { A -> B; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tpdf -
+          echo 'seqdiag { A -> B [label = "call"]; A <- B [label = "return"]; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=seqdiag -
+          echo 'actdiag { write -> convert -> image; lane user { label = "User"; write [label = "Writing reST"]; image [label = "Get diagram IMAGE"]; }; lane actdiag { convert [label = "Convert reST to Image"]; } }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=actdiag -
+          echo 'packetdiag {  colwidth = 32;  node_height = 72;  0-15: Source Port;  16-31: Destination Port; }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=packetdiag -
+          echo 'nwdiag { network dmz { web01; web02; }; network internal { web01; web02; db01; } }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=nwdiag -
+          echo 'rackdiag { 8U; 1: UPS [2U]; 3: DB Server; 4: Web Server;  8: L3 Switch }' | ./blockdiag-bundle-${PLATFORM}.bin -Tsvg --module=rackdiag -
+        env:
+          PLATFORM: ${{ matrix.os }}
+      - name: Cache native image
+        uses: actions/cache/save@v3
+        with:
+          path: "blockdiag-bundle-${PLATFORM}.bin"
+          key: "native-image-${PLATFORM}-${{ github.run_id }}"
+          enableCrossOsArchive: true
+  upload:
+    needs: [ native_images ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set release version
+        env:
+          REF: ${{ github.event.inputs.tag }}
+        run: |
+          echo "release_version=${REF#v}" >> $GITHUB_ENV
+          echo "release_version=${REF#v}" >> $GITHUB_OUTPUT
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Restore Native-image-linux-amd64 cache
+        uses: actions/cache/restore@v3
+        with:
+          path: "blockdiag-bundle-linux-amd64.bin"
+          key: "native-image-linux-amd64-${{ github.run_id }}"
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+      - name: Restore Native-image-linux-arm64 cache
+        uses: actions/cache/restore@v3
+        with:
+          path: "blockdiag-bundle-linux-arm64.bin"
+          key: "native-image-linux-arm64-${{ github.run_id }}"
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+      - name: Create release
+        run: |
+          gh release view "v$RELEASE_VERSION" || gh release create "v$RELEASE_VERSION"
+          gh release upload "v$RELEASE_VERSION" ./blockdiag-bundle-linux-amd64.bin ./blockdiag-bundle-linux-arm64.bin --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ env.release_version }}
