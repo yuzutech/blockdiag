@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pkg_resources
+from importlib import metadata
 
 from blockdiag.utils.logging import warning
 
@@ -21,14 +21,14 @@ drawers = {}
 
 
 def init_imagedrawers(debug=False):
-    for drawer in pkg_resources.iter_entry_points('blockdiag_imagedrawers'):
+    for drawer in metadata.entry_points(group='blockdiag_imagedrawers'):
         try:
             module = drawer.load()
             if hasattr(module, 'setup'):
                 module.setup(module)
         except Exception as exc:
             if debug:
-                warning('Failed to load %s: %r' % (drawer.module_name, exc))
+                warning('Failed to load %s: %r' % (drawer.name, exc))
 
 
 def install_imagedrawer(ext, drawer):
