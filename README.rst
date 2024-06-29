@@ -9,8 +9,10 @@ Fork of blockdiag
 
 Features
 ========
-* Generate block-diagram from dot like text (basic feature).
-* Support multiple languages for node-label (utf-8 only).
+* Generate block-diagram from dot like text (basic feature)
+* Support multiple languages for node-label (utf-8 only)
+* Support Python 3+
+* Native binaries (see https://github.com/yuzutech/blockdiag/releases)
 
 Install
 =======
