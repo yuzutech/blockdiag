@@ -7,5 +7,3 @@ include tests/VLGothic/*
 recursive-include examples blockdiagrc *.diag *.png *.svg
 recursive-include src *.py
 recursive-include tests README *.py *.diag *.gif *.png
-
-exclude examples/update.sh
