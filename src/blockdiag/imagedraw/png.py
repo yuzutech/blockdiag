@@ -100,6 +100,8 @@ def style2cycle(style, thick):
 
 
 def ttfont_for(font):
+    if font.size <= 0:
+        return None
     if font.path:
         path, index = parse_fontpath(font.path)
         if index:
