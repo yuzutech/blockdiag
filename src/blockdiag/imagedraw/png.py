@@ -29,7 +29,6 @@ from blockdiag.utils import XY, Box, Size, images
 from blockdiag.utils.fontmap import FontMap, parse_fontpath
 from blockdiag.utils.myitertools import istep, stepslice
 
-
 # to support pillow < 9.1.0
 if not hasattr(Image, 'Resampling'):
     from enum import IntEnum
