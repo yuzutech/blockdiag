@@ -234,7 +234,7 @@ class SVGImageDrawElement(_base.ImageDraw):
 
     def image(self, box, url):
         if hasattr(url, 'read'):
-            url = "data:;base64," + str(b64encode(url.read()))
+            url = "data:;base64," + b64encode(url.read()).decode('utf-8')
         else:
             if isinstance(url, Image):
                 ext = None
@@ -245,7 +245,7 @@ class SVGImageDrawElement(_base.ImageDraw):
                 stream = None
                 try:
                     stream = images.open(url, mode='png')
-                    url = "data:;base64," + str(b64encode(stream.read()))
+                    url = "data:;base64," + b64encode(stream.read()).decode('utf-8')
                 except IOError:
                     url = None
                 finally:
