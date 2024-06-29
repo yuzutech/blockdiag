@@ -15,7 +15,7 @@
 
 from collections import defaultdict
 
-from blockdiag.tests.utils import BuilderTestCase
+from tests.utils import BuilderTestCase
 
 
 class TestBuilderNode(BuilderTestCase):
@@ -97,8 +97,7 @@ class TestBuilderNode(BuilderTestCase):
         orientations = defaultdict(lambda: 'horizontal')
         orientations['J'] = 'vertical'
         backgrounds = defaultdict(lambda: None)
-        backgrounds['K'] = ('src/blockdiag/tests/diagrams/'
-                            'debian-logo-256color-palettealpha.png')
+        backgrounds['K'] = ('tests/diagrams/debian-logo-256color-palettealpha.png')
 
         diagram = self.build('node_attribute.diag')
         self.assertNodeLabel(diagram, labels)

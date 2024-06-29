@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from blockdiag.parser import ParseException
-from blockdiag.tests.utils import BuilderTestCase
+from tests.utils import BuilderTestCase
 
 
 class TestBuilderError(BuilderTestCase):

@@ -1,0 +1,5 @@
+{
+  A [background = "tests/diagrams/white.gif"];
+  B [background = "tests/diagrams/invalid.txt"];
+  Z;
+}

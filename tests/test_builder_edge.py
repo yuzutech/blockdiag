@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from blockdiag.tests.utils import BuilderTestCase, capture_stderr
+from tests.utils import BuilderTestCase, capture_stderr
 
 
 class TestBuilderEdge(BuilderTestCase):

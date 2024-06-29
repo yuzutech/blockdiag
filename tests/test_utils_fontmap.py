@@ -20,7 +20,7 @@ import unittest
 from collections import namedtuple
 from io import StringIO
 
-from blockdiag.tests.utils import capture_stderr
+from tests.utils import capture_stderr
 from blockdiag.utils.fontmap import FontInfo, FontMap
 
 FontElement = namedtuple('FontElement', 'fontfamily fontsize')

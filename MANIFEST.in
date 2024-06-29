@@ -3,8 +3,9 @@ include MANIFEST.in
 include LICENSE
 include blockdiag.1
 include tox.ini
-include src/blockdiag/tests/VLGothic/*
+include tests/VLGothic/*
 recursive-include examples blockdiagrc *.diag *.png *.svg
-recursive-include src README *.py *.diag *.gif *.png
+recursive-include src *.py
+recursive-include tests README *.py *.diag *.gif *.png
 
 exclude examples/update.sh
