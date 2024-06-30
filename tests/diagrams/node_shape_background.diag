@@ -1,0 +1,29 @@
+{
+  A [shape = "box", background = "tests/diagrams/white.gif"];
+  B [shape = "roundedbox", background = "tests/diagrams/white.gif"];
+  C [shape = "diamond", background = "tests/diagrams/white.gif"];
+  D [shape = "ellipse", background = "tests/diagrams/white.gif"];
+  E [shape = "note", background = "tests/diagrams/white.gif"];
+  F [shape = "cloud", background = "tests/diagrams/white.gif"];
+  G [shape = "mail", background = "tests/diagrams/white.gif"];
+  H [shape = "beginpoint", background = "tests/diagrams/white.gif"];
+  I [shape = "endpoint", background = "tests/diagrams/white.gif"];
+  J [shape = "minidiamond", background = "tests/diagrams/white.gif"];
+
+  K [shape = "flowchart.condition", background = "tests/diagrams/white.gif"];
+  L [shape = "flowchart.database", background = "tests/diagrams/white.gif"];
+  M [shape = "flowchart.input", background = "tests/diagrams/white.gif"];
+  N [shape = "flowchart.loopin", background = "tests/diagrams/white.gif"];
+  O [shape = "flowchart.loopout", background = "tests/diagrams/white.gif"];
+
+  P [shape = "actor", background = "tests/diagrams/white.gif"];
+  Q [shape = "flowchart.terminator", background = "tests/diagrams/white.gif"];
+  R [shape = "textbox", background = "tests/diagrams/white.gif"];
+  S [shape = "dots", background = "tests/diagrams/white.gif"];
+  T [shape = "none", background = "tests/diagrams/white.gif"];
+
+  U [shape = "square", background = "tests/diagrams/white.gif"];
+  V [shape = "circle", background = "tests/diagrams/white.gif"];
+
+  Z;
+}

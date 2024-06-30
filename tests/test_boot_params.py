@@ -20,7 +20,7 @@ import unittest
 
 import blockdiag
 from blockdiag.command import BlockdiagOptions
-from blockdiag.tests.utils import with_pdf
+from tests.utils import with_pdf
 from blockdiag.utils.bootstrap import detectfont
 
 

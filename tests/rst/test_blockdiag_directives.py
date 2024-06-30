@@ -21,8 +21,8 @@ from docutils import nodes
 from docutils.core import publish_doctree
 from docutils.parsers.rst import directives as docutils
 
-from blockdiag.tests.test_generate_diagram import TESTDIR, get_fontpath
-from blockdiag.tests.utils import TemporaryDirectory, capture_stderr, with_pil
+from tests.test_generate_diagram import TESTDIR, get_fontpath
+from tests.utils import TemporaryDirectory, capture_stderr, with_pil
 from blockdiag.utils.rst import directives
 
 

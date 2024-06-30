@@ -21,7 +21,7 @@ from docutils import nodes
 from docutils.core import publish_doctree
 from docutils.parsers.rst import directives as docutils
 
-from blockdiag.tests.utils import TemporaryDirectory, capture_stderr
+from tests.utils import TemporaryDirectory, capture_stderr
 from blockdiag.utils.rst import directives
 from blockdiag.utils.rst.nodes import blockdiag as blockdiag_node
 

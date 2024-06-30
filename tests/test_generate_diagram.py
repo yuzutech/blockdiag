@@ -23,8 +23,7 @@ import pytest
 
 import blockdiag
 import blockdiag.command
-from blockdiag.tests.utils import (TemporaryDirectory, capture_stderr,
-                                   supported_pdf, supported_pil)
+from tests.utils import (TemporaryDirectory, capture_stderr, supported_pdf, supported_pil)
 
 TESTDIR = os.path.dirname(__file__)
 FONTPATH = os.path.join(TESTDIR, 'VLGothic', 'VL-Gothic-Regular.ttf')
