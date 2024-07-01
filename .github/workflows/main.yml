@@ -17,10 +17,14 @@ jobs:
             toxenv: py310
           - python-version: '3.11'
             toxenv: py311
+          - python-version: '3.12'
+            toxenv: py312
           - python-version: '3.11'
             toxenv: pillow8.x
           - python-version: '3.11'
             toxenv: pillow9.x
+          - python-version: '3.11'
+            toxenv: pillow10.x
           - python-version: '3.11'
             toxenv: sdist
           - python-version: '3.11'
