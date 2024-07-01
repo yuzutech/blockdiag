@@ -21,6 +21,10 @@ jobs:
             toxenv: pillow8.x
           - python-version: '3.11'
             toxenv: pillow9.x
+          - python-version: '3.11'
+            toxenv: sdist
+          - python-version: '3.11'
+            toxenv: wheel
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
