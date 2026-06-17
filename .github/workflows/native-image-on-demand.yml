@@ -13,30 +13,16 @@ jobs:
   native_images:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
-        include:
-          - os: 'ubuntu-latest'
-            platform: 'linux-amd64'
-          - os: 'ARM64' # self-hosted
-            platform: 'linux-arm64'
+        os: [ ubuntu-24.04, ubuntu-24.04-arm ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           ref: "refs/tags/${{ github.event.inputs.tag }}"
       - name: Set up Python 3.11
-        # actions/setup-python does not work on arm64/linux
-        # https://github.com/actions/setup-python/issues/678
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
-        # we can skip this step since Python3 is already installed on the self-hosted runner.
-        if: ${{ matrix.platform != 'linux-arm64' }}
-      - name: Install system dependencies
-        run: |
-          sudo apt-get install fonts-ipafont-gothic ghostscript libjpeg8-dev libfreetype6-dev ccache patchelf
-        # we can skip this step since system dependencies are already installed on the self-hosted runner.
-        if: ${{ matrix.platform != 'linux-arm64' }}
       - name: Install project dependencies
         run: | 
           pip install -U docutils tox nuitka
@@ -46,16 +32,16 @@ jobs:
         run: |
           python3 -m nuitka --nofollow-import-to=*.tests \
             --nofollow-import-to=reportlab.graphics.testshapes \
-            --include-module=actdiag \
-            --include-module=nwdiag \
-            --include-module=seqdiag \
-            --include-module=packetdiag \
-            --include-module=rackdiag \
+            --include-package=actdiag \
+            --include-package=nwdiag \
+            --include-package=seqdiag \
+            --include-package=packetdiag \
+            --include-package=rackdiag \
             --include-module=reportlab.pdfgen.canvas \
-            --include-module=blockdiag.imagedraw \
-            --include-module=blockdiag.plugins \
-            --include-module=blockdiag.utils \
-            --include-module=blockdiag.noderenderer \
+            --include-package=blockdiag.imagedraw \
+            --include-package=blockdiag.plugins \
+            --include-package=blockdiag.utils \
+            --include-package=blockdiag.noderenderer \
             --onefile src/blockdiag \
             --output-filename=blockdiag-bundle-${PLATFORM}.bin
         env:
@@ -73,7 +59,7 @@ jobs:
         env:
           PLATFORM: ${{ matrix.platform }}
       - name: Cache native image
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v5
         with:
           path: "blockdiag-bundle-${{ matrix.platform }}.bin"
           key: "native-image-${{ matrix.platform }}-${{ github.run_id }}"
@@ -89,9 +75,9 @@ jobs:
           echo "release_version=${REF#v}" >> $GITHUB_ENV
           echo "release_version=${REF#v}" >> $GITHUB_OUTPUT
       - name: Checkout the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Restore Native-image-linux-amd64 cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v5
         with:
           path: "blockdiag-bundle-linux-amd64.bin"
           key: "native-image-linux-amd64-${{ github.run_id }}"

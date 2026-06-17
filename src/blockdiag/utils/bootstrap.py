@@ -54,7 +54,7 @@ class Application(object):
             parsed = self.parse_diagram()
             return self.build_diagram(parsed)
         except SystemExit as e:
-            return e
+            return e.code
         except UnicodeEncodeError:
             error("UnicodeEncodeError caught (check your font settings)")
             return -1
