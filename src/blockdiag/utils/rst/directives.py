@@ -391,8 +391,6 @@ class BlockdiagDirective(BlockdiagDirectiveBase):
 
 
 def setup(**kwargs):
-    global directive_options, directive_options_default
-
     for key, value in directive_options_default.items():
         directive_options[key] = kwargs.get(key, value)
 
